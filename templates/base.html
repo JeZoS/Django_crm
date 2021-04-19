@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -7,19 +9,12 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0"
     />
+    <link href="{% static 'css/style.css' %}" rel='stylesheet' />
     <link
       href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
       rel="stylesheet"
     />
     <title>CRM</title>
-    <style>
-      .lead {
-        padding: 10px 6px;
-        margin-top: 10px;
-        background-color: #f6f6f6;
-        width: 100%;
-      }
-    </style>
   </head>
   <body>
     <div class="max-w-7xl mx-auto" >
