@@ -6,7 +6,7 @@ from .forms import LeadForm,LeadModelForm,CustomUserCreationForm
 from django.views.generic import TemplateView,ListView,DetailView,CreateView,UpdateView,DeleteView
 from django.views import generic
 from django.contrib.auth.forms import UserCreationForm
-
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 class SignupView(generic.CreateView):
     template_name = "registration/signup.html"
@@ -21,7 +21,7 @@ class LandingPageView(TemplateView):
 def landing_page(request):
     return render(request,'landing.html')
 
-class LeadListView(ListView):
+class LeadListView(LoginRequiredMixin,ListView):
     template_name = 'leads/home_page.html'
     queryset = Lead.objects.all()
     context_object_name = 'leads'
@@ -33,7 +33,7 @@ def lead_list(requests):
     }
     return render(requests, 'leads/home_page.html', context)
 
-class LeadDetailView(DetailView):
+class LeadDetailView(LoginRequiredMixin,DetailView):
     template_name = 'leads/lead_detail.html'
     queryset = Lead.objects.all()
     context_object_name = 'lead' 
@@ -45,7 +45,7 @@ def lead_detail(requests, pk):
     }
     return render(requests, 'leads/lead_detail.html', context)
 
-class LeadCreateView(CreateView):
+class LeadCreateView(LoginRequiredMixin,CreateView):
     template_name = 'leads/lead_create.html'
     form_class = LeadModelForm
 
@@ -79,7 +79,7 @@ def lead_create(requests):
     }
     return render(requests, "leads/lead_create.html", context)
 
-class LeadUpdateView(UpdateView):
+class LeadUpdateView(LoginRequiredMixin,UpdateView):
     template_name = 'leads/lead_update.html'
     queryset = Lead.objects.all()
     form_class = LeadModelForm
@@ -114,7 +114,7 @@ def lead_update(requests,pk):
     }
     return render(requests, "leads/lead_update.html", context)
 
-class LeadDeleteView(DeleteView):
+class LeadDeleteView(LoginRequiredMixin,DeleteView):
     template_name = 'leads/lead_delete.html'
     queryset = Lead.objects.all()
     # form_class = LeadModelForm
