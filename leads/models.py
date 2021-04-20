@@ -6,7 +6,8 @@ from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
-    pass
+    is_organiser = models.BooleanField(default=True)
+    is_agent = models.BooleanField(default=False)
 
 
 class UserProfile(models.Model):
@@ -24,7 +25,8 @@ class Lead(models.Model):
     first_name = models.CharField(max_length=20)
     last_name = models.CharField(max_length=20)
     age = models.IntegerField(default=0)
-    agent = models.ForeignKey("Agent", on_delete=models.CASCADE)
+    agent = models.ForeignKey(
+        "Agent", null=True, blank=True, on_delete=models.SET_NULL)
 
 
 class Agent(models.Model):
@@ -35,9 +37,11 @@ class Agent(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     organisation = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
 
-def post_user_create_signal(sender,instance,created,**kwargs):
+
+def post_user_create_signal(sender, instance, created, **kwargs):
     # print(instance)
     if created:
-        UserProfile.objects.create(user = instance)
+        UserProfile.objects.create(user=instance)
 
-post_save.connect(post_user_create_signal,sender=User)
+
+post_save.connect(post_user_create_signal, sender=User)

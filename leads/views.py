@@ -7,6 +7,7 @@ from django.views.generic import TemplateView,ListView,DetailView,CreateView,Upd
 from django.views import generic
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
+from agents.mixins import OrganiserAndLoginRequiredMixin
 
 class SignupView(generic.CreateView):
     template_name = "registration/signup.html"
@@ -23,8 +24,13 @@ def landing_page(request):
 
 class LeadListView(LoginRequiredMixin,ListView):
     template_name = 'leads/home_page.html'
-    queryset = Lead.objects.all()
     context_object_name = 'leads'
+
+    def get_queryset(self):
+        queryset = Lead.objects.all()
+        if self.request.user.is_agent:
+            queryset = queryset.filter(agent__user=self.request.user)
+        return queryset
 
 def lead_list(requests):
     leads = Lead.objects.all()
@@ -45,7 +51,7 @@ def lead_detail(requests, pk):
     }
     return render(requests, 'leads/lead_detail.html', context)
 
-class LeadCreateView(LoginRequiredMixin,CreateView):
+class LeadCreateView(OrganiserAndLoginRequiredMixin,CreateView):
     template_name = 'leads/lead_create.html'
     form_class = LeadModelForm
 
