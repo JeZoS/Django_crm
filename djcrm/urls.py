@@ -4,6 +4,8 @@ from django.contrib import admin
 from django.contrib.auth.views import LoginView, LogoutView, PasswordResetView, PasswordResetConfirmView, PasswordResetDoneView,PasswordResetCompleteView
 from django.urls import path, include
 from leads.views import landing_page, LandingPageView, SignupView
+from django.views.static import serve
+from django.conf.urls import url
 
 urlpatterns = [
     path('', LandingPageView.as_view(), name='landing-page'),
@@ -16,7 +18,9 @@ urlpatterns = [
     path('password-reset-done/',PasswordResetDoneView.as_view(),name='password_reset_done'),
     path('password-reset-confirm/<uidb64>/<token>/',PasswordResetConfirmView.as_view(),name='password_reset_confirm'),
     path('password-reset-complete/',PasswordResetCompleteView.as_view(),name='password_reset_complete'),
-    path('logout/', LogoutView.as_view(), name='logout')
+    path('logout/', LogoutView.as_view(), name='logout'),
+    url(r'^media/(?P<path>.*)$', serve,{'document_root': settings.MEDIA_ROOT}), 
+    url(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
 ]
 
 if settings.DEBUG:

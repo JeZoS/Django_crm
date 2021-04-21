@@ -8,11 +8,13 @@
         <h1 class="text-4xl text-gray-800">Leads</h1>
       </div>
       <div>
+      {% if request.user.is_organiser %}
         <a
           class="text-gray-500 hover:text-blue-500"
           href="{% url 'leads:lead-create' %}"
           >Create lead</a
         >
+      {% endif %}
       </div>
     </div>
     <div class="flex flex-wrap -m-4">
@@ -82,8 +84,12 @@
         </div>
       </div>
       {% endfor %}
+    </div>
+    <div class="mt-5 flex flex-wrap -m-4" >
       {% if unassigned_leads.exists %}
-      <h1>Unassigned Leads</h1>
+      <div class="w-full">
+        <h1>Unassigned Leads</h1>
+      </div>
       {% for lead in unassigned_leads %}
 
       <div class="p-4 lg:w-1/2 md:w-full">
@@ -119,7 +125,10 @@
             </h2>
             <p class="leading-relaxed text-base">
               Lorem ipsum dolor sit amet consectetur,
-              adipisicing elit.
+              adipisicing elit.Facere neque atque impedit
+              nihil quaerat praesentium. Provident, ex
+              omnis. Omnis laborum tempora optio cum, autem
+              aut officia repellat.
             </p>
             <a
               href=" {% url 'leads:assign-agent' lead.id %} "
