@@ -26,9 +26,20 @@ class Lead(models.Model):
     last_name = models.CharField(max_length=20)
     age = models.IntegerField(default=0)
     organisation = models.ForeignKey(
-        UserProfile, null=True, blank=True, on_delete=models.SET_NULL)
+        UserProfile,  null=True, on_delete=models.CASCADE)
     agent = models.ForeignKey(
-        "Agent", on_delete=models.CASCADE)
+        "Agent", null=True, blank=True, on_delete=models.SET_NULL)
+    category = models.ForeignKey(
+        "Category", null=True, blank=True, on_delete=models.SET_NULL)
+
+
+class Category(models.Model):
+    name = models.CharField(max_length=30)
+    organisation = models.ForeignKey(
+        UserProfile, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
 
 
 class Agent(models.Model):

@@ -1,8 +1,8 @@
 from django.core.mail import send_mail
 from django.shortcuts import render, redirect, reverse
 from django.http import HttpResponse
-from .models import Lead, Agent
-from .forms import LeadForm, LeadModelForm, CustomUserCreationForm
+from .models import Lead, Agent, Category
+from .forms import LeadForm, LeadModelForm, CustomUserCreationForm, AssignAgentForm
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.views import generic
 from django.contrib.auth.forms import UserCreationForm
@@ -39,9 +39,7 @@ class LeadListView(LoginRequiredMixin, ListView):
         else:
             queryset = queryset.filter(
                 organisation=user.agent.organisation, agent__isnull=False)
-            print(queryset)
             queryset = queryset.filter(agent__user=user)
-            print(queryset)
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -86,19 +84,15 @@ class LeadCreateView(OrganiserAndLoginRequiredMixin, CreateView):
         return reverse('leads:lead-list')
 
     def form_valid(self, form):
+        data = form.cleaned_data
+        lead = form.save(commit=False)
+        lead.organisation = self.request.user.userprofile
+        lead.save()
         send_mail(
             subject="A Lead has been created",
             message="Go to the site to see the lead",
             from_email='test@test.com',
             recipient_list=["test2@test.com"]
-        )
-        data = form.cleaned_data
-        Lead.objects.create(
-            first_name=data['first_name'],
-            last_name=data['last_name'],
-            age=data['age'],
-            agent=data['agent'],
-            organisation=self.request.user.userprofile
         )
         return super(LeadCreateView, self).form_valid(form)
 
@@ -123,7 +117,7 @@ def lead_create(requests):
     return render(requests, "leads/lead_create.html", context)
 
 
-class LeadUpdateView(LoginRequiredMixin, UpdateView):
+class LeadUpdateView(OrganiserAndLoginRequiredMixin, UpdateView):
     template_name = 'leads/lead_update.html'
     queryset = Lead.objects.all()
     form_class = LeadModelForm
@@ -160,7 +154,7 @@ def lead_update(requests, pk):
     return render(requests, "leads/lead_update.html", context)
 
 
-class LeadDeleteView(LoginRequiredMixin, DeleteView):
+class LeadDeleteView(OrganiserAndLoginRequiredMixin, DeleteView):
     template_name = 'leads/lead_delete.html'
     queryset = Lead.objects.all()
     # form_class = LeadModelForm
@@ -175,4 +169,41 @@ def lead_delete(request, pk):
     return redirect('/leads')
 
 
-# class AssignAgentView(OrganiserAndLoginRequiredMixin):
+class AssignAgentView(OrganiserAndLoginRequiredMixin, generic.FormView):
+    template_name = "leads/assign_agent.html"
+    form_class = AssignAgentForm
+
+    def get_form_kwargs(self, **kwargs):
+        kwargs = super(AssignAgentView, self).get_form_kwargs(**kwargs)
+        kwargs.update({
+            "request": self.request
+        })
+        return kwargs
+
+    def get_success_url(self):
+        return reverse('leads:lead-list')
+
+    def form_valid(self, form):
+        agent = form.cleaned_data["agent"]
+        print(agent)
+        lead = Lead.objects.get(id=self.kwargs["pk"])
+        print(lead.agent)
+        lead.agent = agent
+        print(lead.agent)
+        lead.save()
+        return super(AssignAgentView, self).form_valid(form)
+
+
+class CategoryListView(LoginRequiredMixin, generic.ListView):
+    template_name = 'leads/category_list.html'
+    context_object_name = 'category_list'
+    def get_queryset(self):
+        user = self.request.user
+        queryset = Category.objects.all()
+        if user.is_organiser:
+            queryset = queryset.filter(
+                organisation=user.userprofile)
+        else:
+            queryset = queryset.filter(
+                organisation=user.agent.organisation)
+        return queryset

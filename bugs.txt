@@ -1,0 +1,1 @@
+set proper permissions on lead update,create,delete
